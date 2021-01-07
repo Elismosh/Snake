@@ -131,13 +131,13 @@ while running:
             snake.update(10)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
-                snake.update(0)
+                head.update(0)
             elif event.key == pygame.K_a:
-                snake.update(-1)
+                head.update(-1)
             elif event.key == pygame.K_s:
-                snake.update(2)
+                head.update(2)
             elif event.key == pygame.K_d:
-                snake.update(1)
+                head.update(1)
     load_background()
     if not is_apple:
         Apple()
