@@ -30,15 +30,18 @@ class Snake(pygame.sprite.Sprite):
         self.direction = 0
         self.name = name
         self.image = load_image(self.name + str(self.direction) + '.png')
-        self.x = -1
-        self.y = -1
+        # self.x = -1
+        # self.y = -1
+        self.shift_x = 0
+        self.shift_y = 0
+        self.list_of_chng_dir = []
         # if head:
         #     self.x = x
         #     self.y = y
         # else:
         #     self.x = -1
         #     self.y = -1
-        self.rect = pygame.Rect(self.x * tile_size + 2, self.y * tile_size + 2, tile_size, tile_size)
+        self.rect = pygame.Rect(x * tile_size + 2, y * tile_size + 2, tile_size, tile_size)
         self.mask = pygame.mask.from_surface(self.image)
 
     def moving(self):
@@ -46,8 +49,11 @@ class Snake(pygame.sprite.Sprite):
             self.rect = self.rect.move(self.direction, 0)
         else:
             self.rect = self.rect.move(0, self.direction - 1)
-        if self.rect.x == head.x and self.rect.y == head.y:
-            self.change_direction(head.direction)
+        if head.list_of_chng_dir:
+            if self.rect.x == head.list_of_chng_dir[0][0] and self.rect.y == head.list_of_chng_dir[0][1]:
+                self.change_direction(head.list_of_chng_dir[0][2])
+                if self == tail:
+                    del head.list_of_chng_dir[0]
         if pygame.sprite.spritecollideany(self, borders):
             pass
         if pygame.sprite.spritecollideany(self, apple):
@@ -55,27 +61,46 @@ class Snake(pygame.sprite.Sprite):
 
     def change_direction(self, dirctn):
         if self == head:
-            self.x = self.rect.x
-            self.y = self.rect.y
-        if self.rect.x == head.x and self.rect.y == head.y:
             if (self.direction + dirctn) % 2 == 1:
                 self.direction = dirctn
                 if self.direction in [0, 2]:
-                    if self.rect.x - self.rect.x // tile_size * tile_size < 25:
-                        self.rect.x = self.rect.x // tile_size * tile_size
+                    self.shift_x = self.rect.x - self.rect.x // tile_size * tile_size
+                    self.shift_y = 0
+                    if self.shift_x < 25:
+                        self.rect.x = self.rect.x // tile_size * tile_size + 2
                     else:
-                        self.rect.x = (self.rect.x // tile_size + 1) * tile_size
+                        self.rect.x = (self.rect.x // tile_size + 1) * tile_size + 2
+                        self.shift_x = self.shift_x - 50
                 else:
-                    if self.rect.y - self.rect.y // tile_size * tile_size < 25:
-                        self.rect.y = self.rect.y // tile_size * tile_size
+                    self.shift_y = self.rect.y - self.rect.y // tile_size * tile_size
+                    self.shift_x = 0
+                    if self.shift_y < 25:
+                        self.rect.y = self.rect.y // tile_size * tile_size + 2
                     else:
-                        self.rect.y = (self.rect.y // tile_size + 1) * tile_size
+                        self.shift_y = self.shift_y - 50
+                        self.rect.y = (self.rect.y // tile_size + 1) * tile_size + 2
+                self.list_of_chng_dir.append([self.rect.x, self.rect.y, self.direction])
                 self.image = load_image(self.name + str(self.direction) + '.png')
                 self.mask = pygame.mask.from_surface(self.image)
+                snake.update(3)
+                print(self.list_of_chng_dir)
+        else:
+            self.direction = dirctn
+            self.image = load_image(self.name + str(self.direction) + '.png')
+            self.mask = pygame.mask.from_surface(self.image)
+        # if self.rect.x == head.x and self.rect.y == head.y:
+        #     pass
+
+    def add_shift(self):
+        if self != head:
+            self.rect.x -= head.shift_x
+            self.rect.y -= head.shift_y
 
     def update(self, num):
         if num == 10:
             self.moving()
+        elif num == 3:
+            self.add_shift()
         else:
             self.change_direction(num)
 
@@ -116,7 +141,7 @@ Border(0, height - 2, width, 2)
 Border(0, 0, 2, height)
 head = Snake(9, 9, 'head')
 Snake(9, 10, 'body')
-Snake(9, 11, 'body')
+tail = Snake(9, 11, 'body')
 
 MYEVENTTYPE = pygame.USEREVENT + 1
 pygame.time.set_timer(MYEVENTTYPE, 10)
