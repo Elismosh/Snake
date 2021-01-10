@@ -22,49 +22,41 @@ def load_image(name):
     return image
 
 
-class Snake(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+class PartOfSnake(pygame.sprite.Sprite):
+    def __init__(self, x, y, direction):
         super().__init__(all_sprites)
         self.add(snake)
-        self.len = 3
-        self.direction = 0
-        self.list = [[x * tile_size, y * tile_size, 'head', self.direction],
-                     [x * tile_size, (y + 1) * tile_size, 'body', self.direction],
-                     [x * tile_size, (y + 2) * tile_size, 'tail', self.direction]]
-        self.copy = self.list.copy()
+        self.x = x
+        self.y = y
+        self.direction = direction
 
     def change_direction(self, dirctn=None):
         if (self.direction + dirctn) % 2 == 1:
             self.direction = dirctn
 
-    def update(self):
-        if self.direction in [0, 2]:
-            self.list.insert(0, [self.list[0][0], self.list[0][1] + (self.direction - 1) * tile_size, 'head',
-                                 self.direction])
-        else:
-            self.list.insert(0, [self.list[0][0] + self.direction * tile_size, self.list[0][1], 'head', self.direction])
-        self.list[1][2] = 'body'
-        if self.list[0][0] == apple_object.rect.x and self.list[0][1] == apple_object.rect.y:
-            is_apple = False
-        else:
-            self.list.pop()
-            self.list[-1][2] = 'tail'
-        self.copy = self.list.copy()
-
-    def move(self):
-        for elem in self.list:
+    # def update(self):
+    #     if self.direction in [0, 2]:
+    #         self.list.insert(0, [self.list[0][0], self.list[0][1] + (self.direction - 1) * tile_size, 'head', self.direction])
+    #     else:
+    #         self.list.insert(0, [self.list[0][0] + self.direction * tile_size, self.list[0][1], 'head', self.direction])
+    #     self.list[1][2] = 'body'
+    #     if self.list[0][0] == apple_object.rect.x and self.list[0][1] == apple_object.rect.y:
+    #         is_apple = False
+    #     else:
+    #         self.list.pop()
+    #         self.list[-1][2] = 'tail'
 
     # def eat_apple(self):
     #     # Part_of_snake()
     #     # self.len += 1
     #     pass
 
-    def draw(self):
-        for elem in self.list:
-            image = load_image(elem[2] + str(elem[3]) + '.png')
-            rect = image.get_rect()
-            rect.x, rect.y = elem[0] + (tile_size - rect.width) // 2, elem[1] + (tile_size - rect.height) // 2
-            screen.blit(image, rect)
+    # def draw(self):
+    #     for elem in self.list:
+    #         image = load_image(elem[2] + str(elem[3]) + '.png')
+    #         rect = image.get_rect()
+    #         rect.x, rect.y = elem[0] + (tile_size - rect.width) // 2, elem[1] + (tile_size - rect.height) // 2
+    #         screen.blit(image, rect)
 
 
 class Border(pygame.sprite.Sprite):
@@ -102,7 +94,10 @@ Border(0, 0, width, 2)
 Border(width - 2, 0, 2, height)
 Border(0, height - 2, width, 2)
 Border(0, 0, 2, height)
-snake_object = Snake(9, 9)
+head = PartOfSnake(9 * tile_size, 9 * tile_size, 0)
+PartOfSnake(9 * tile_size, 10 * tile_size, 0)
+PartOfSnake(9 * tile_size, 11 * tile_size, 0)
+
 apple_object = Apple()
 MYEVENTTYPE = pygame.USEREVENT + 1
 pygame.time.set_timer(MYEVENTTYPE, 500)
@@ -110,6 +105,7 @@ pygame.time.set_timer(MYEVENTTYPE, 500)
 running = True
 is_apple = True
 while running:
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False

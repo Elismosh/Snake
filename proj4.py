@@ -6,11 +6,13 @@ import pygame
 
 
 def load_background():
-    colors = ['#449f35', '#60c44f']
-    for i in range(tile_in_height):
-        for j in range(tile_in_width):
-            pygame.draw.rect(screen, colors[(i + j) % 2],
-                             (tile_size * j + 2, tile_size * i + 2, tile_size, tile_size), 0)
+    color = '#60c44f'
+    # for i in range(tile_in_height):
+    #     for j in range(tile_in_width):
+    #         pygame.draw.rect(screen, colors[(i + j) % 2],
+    #                          (tile_size * j + 2, tile_size * i + 2, tile_size, tile_size), 0)
+    pygame.draw.rect(screen, color,
+                     (0, 0, width, height), 0)
 
 
 def load_image(name):
@@ -28,36 +30,62 @@ class Snake(pygame.sprite.Sprite):
         self.add(snake)
         self.len = 3
         self.direction = 0
-        self.list = [[x * tile_size, y * tile_size, 'head', self.direction], [x * tile_size, (y + 1) * tile_size, 'body', self.direction],
+        self.list = [[x * tile_size, y * tile_size, 'head', self.direction],
+                     [x * tile_size, (y + 1) * tile_size, 'body', self.direction],
                      [x * tile_size, (y + 2) * tile_size, 'tail', self.direction]]
+        self.copy = self.list.copy()
 
     def change_direction(self, dirctn=None):
         if (self.direction + dirctn) % 2 == 1:
             self.direction = dirctn
             self.list[0][3] = self.direction
-            if self.direction in [0, 2]:
-                shift_x = self.list[0][0] - self.list[0][0] // tile_size * tile_size
-                shift_y = 0
-                if shift_x > 25:
-                    shift_x = shift_x - 50
-            else:
-                shift_y = self.list[0][1] - self.list[0][1] // tile_size * tile_size
-                shift_x = 0
-                if shift_y > 25:
-                    shift_y = shift_y - 50
-            for elem in self.list:
-                elem[0] -= shift_x
-                elem[1] -= shift_y
+            # if self.direction in [0, 2]:
+            #     shift_x = self.list[0][0] - self.list[0][0] // tile_size * tile_size
+            #     shift_y = 0
+            #     if shift_x > 25:
+            #         shift_x = shift_x - 50
+            # else:
+            #     shift_y = self.list[0][1] - self.list[0][1] // tile_size * tile_size
+            #     shift_x = 0
+            #     if shift_y > 25:
+            #         shift_y = shift_y - 50
+            # for elem in self.list:
+            #     elem[0] -= shift_x
+            #     elem[1] -= shift_y
 
     def update(self):
-        if self.direction in [0, 2]:
-            for i in range(len(self.list)):
-                self.list.insert(i, [self.list[i][0], self.list[i][1] + (self.direction - 1), self.list[i][2], self.list[i][3]])
-                del self.list[i + 1]
-        else:
-            for i in range(len(self.list)):
-                self.list.insert(i, [self.list[i][0] + self.direction, self.list[i][1], self.list[i][2], self.list[i][3]])
-                del self.list[i + 1]
+        for i in range(1, len(self.list)):
+            self.list[i][3] = self.copy[i - 1][3]
+        self.copy = self.list.copy()
+        # self.list.insert(0, [self.list[0][0], self.list[0][1], self.list[0][2], self.list[0][3]])
+        # self.list[1][2] = 'body'
+        # del self.list[-1]
+        # self.list[-1][2] = 'tail'
+        # for i in range(1, len(self.list)):
+        #     self.list[i][0], self.list[i][1] = self.list[i - 1][0], self.list[i - 1][1]
+        #
+        # for i in range(1, len(self.list)):
+        #     self.list[i][3] = self.list[i - 1][3]
+
+        # for i in range(len(self.list)):
+        #     if self.direction in [0, 2]:
+        #          self.list.insert(i, [self.list[i][0], self.list[i][1] + (self.direction - 1), self.list[i][2],
+        #                              self.list[i][3]])
+        #     else:
+        #         self.list.insert(i, [self.list[i][0] + self.direction, self.list[i][1], self.list[i][2],
+        #                              self.list[i][3]])
+        #     del self.list[i + 1]
+
+        # if self.direction in [0, 2]:
+        #     for i in range(len(self.list)):
+        #         self.list.insert(i, [self.list[i][0], self.list[i][1] + (self.direction - 1), self.list[i][2],
+        #                              self.list[i][3]])
+        #         del self.list[i + 1]
+        # else:
+        #     for i in range(len(self.list)):
+        #         self.list.insert(i,
+        #                          [self.list[i][0] + self.direction, self.list[i][1], self.list[i][2], self.list[i][3]])
+        #         del self.list[i + 1]
         # self.list[1][2] = 'body'
         # if self.list[0][0] == apple_object.rect.x and self.list[0][1] == apple_object.rect.y:
         #     is_apple = False
@@ -72,7 +100,12 @@ class Snake(pygame.sprite.Sprite):
         # else:
         #     for elem in self.list:
         #         elem[0] += self.direction
-
+    def move(self):
+        for elem in self.list:
+            if elem[3] in [0, 2]:
+                elem[1] += elem[3] - 1
+            else:
+                elem[0] += elem[3]
 
     # def eat_apple(self):
     #     # Part_of_snake()
@@ -124,8 +157,11 @@ Border(0, height - 2, width, 2)
 Border(0, 0, 2, height)
 snake_object = Snake(9, 9)
 apple_object = Apple()
-MYEVENTTYPE = pygame.USEREVENT + 1
-pygame.time.set_timer(MYEVENTTYPE, 10)
+MOVESNAKE = pygame.USEREVENT + 1
+UPDATESNAKE = pygame.USEREVENT + 2
+time = 10
+pygame.time.set_timer(MOVESNAKE, time)
+pygame.time.set_timer(UPDATESNAKE, time * tile_size * 2)
 
 running = True
 is_apple = True
@@ -133,10 +169,11 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == MYEVENTTYPE:
-            pass
+        if event.type == MOVESNAKE:
+            snake_object.move()
+        if event.type == UPDATESNAKE:
             snake_object.update()
-            # parts.update(3)
+            print('jfks')
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
                 snake_object.change_direction(0)

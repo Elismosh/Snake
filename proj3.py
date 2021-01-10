@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import time
 
 import pygame
 
@@ -26,26 +27,51 @@ class Snake(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__(all_sprites)
         self.add(snake)
-        self.len = 3
         self.direction = 0
-        self.list = [[x * tile_size, y * tile_size, 'head', self.direction], [x * tile_size, (y + 1) * tile_size, 'body', self.direction],
+        self.list = [[x * tile_size, y * tile_size, 'head', self.direction],
+                     [x * tile_size, (y + 1) * tile_size, 'body', self.direction],
                      [x * tile_size, (y + 2) * tile_size, 'tail', self.direction]]
+        self.chng = 0
+        self.copy = self.list.copy()
 
-    def change_direction(self, dirctn=None):
+    def change_direction(self):
+        if self.list[0][0] % 50 == 0 and self.list[0][1] % 50 == 0:
+            self.direction = self.chng
+
+            print(self.list)
+        print(self.list[0])
+        # print(self.list[0])
+
+    def can_chng_direction(self, dirctn):
         if (self.direction + dirctn) % 2 == 1:
-            self.direction = dirctn
+            self.chng = dirctn
 
     def update(self):
-        if self.direction in [0, 2]:
-            self.list.insert(0, [self.list[0][0], self.list[0][1] + (self.direction - 1) * tile_size, 'head', self.direction])
-        else:
-            self.list.insert(0, [self.list[0][0] + self.direction * tile_size, self.list[0][1], 'head', self.direction])
-        self.list[1][2] = 'body'
-        if self.list[0][0] == apple_object.rect.x and self.list[0][1] == apple_object.rect.y:
-            is_apple = False
-        else:
-            self.list.pop()
-            self.list[-1][2] = 'tail'
+        # if self.direction in [0, 2]:
+        #     self.list.insert(0, [self.list[0][0], self.list[0][1] + (self.direction - 1) * tile_size, 'head', self.direction])
+        # else:
+        #     self.list.insert(0, [self.list[0][0] + self.direction * tile_size, self.list[0][1], 'head', self.direction])
+        # self.list[1][2] = 'body'
+        # if self.list[0][0] == apple_object.rect.x and self.list[0][1] == apple_object.rect.y:
+        #     is_apple = False
+        # else:
+        #     self.list.pop()
+        #     self.list[-1][2] = 'tail'
+        # self.copy = self.list.copy()
+
+        for i in range(1, len(self.list)):
+            self.list[i][0], self.list[i][1], self.list[i][3] = self.copy[i - 1][0], self.copy[i - 1][1], self.copy[i - 1][3]
+        self.copy = self.list
+
+    def move(self):
+        self.list[0][3] = self.direction
+        for elem in self.list:
+            if not(elem[0] % 50 == 0 and elem[1] == 0):
+                if elem[3] in [0, 2]:
+                    elem[1] += elem[3] - 1
+                else:
+                    elem[0] += elem[3]
+        self.change_direction()
 
     # def eat_apple(self):
     #     # Part_of_snake()
@@ -97,28 +123,32 @@ Border(0, height - 2, width, 2)
 Border(0, 0, 2, height)
 snake_object = Snake(9, 9)
 apple_object = Apple()
-MYEVENTTYPE = pygame.USEREVENT + 1
-pygame.time.set_timer(MYEVENTTYPE, 500)
+MOVESNAKE = pygame.USEREVENT + 1
+UPDATESNAKE = pygame.USEREVENT + 2
+timer = 10
+pygame.time.set_timer(MOVESNAKE, timer)
+pygame.time.set_timer(UPDATESNAKE, timer * tile_size)
 
 running = True
 is_apple = True
 while running:
+    # start_time = time.time()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == MYEVENTTYPE:
-            pass
+        if event.type == MOVESNAKE:
+            snake_object.move()
+        if event.type == UPDATESNAKE:
             snake_object.update()
-            # parts.update(3)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_w:
-                snake_object.change_direction(0)
+                snake_object.can_chng_direction(0)
             elif event.key == pygame.K_a:
-                snake_object.change_direction(-1)
+                snake_object.can_chng_direction(-1)
             elif event.key == pygame.K_s:
-                snake_object.change_direction(2)
+                snake_object.can_chng_direction(2)
             elif event.key == pygame.K_d:
-                snake_object.change_direction(1)
+                snake_object.can_chng_direction(1)
     load_background()
     if not is_apple:
         apple_object = Apple()
@@ -127,4 +157,5 @@ while running:
     # snake.draw(screen)
     snake_object.draw()
     pygame.display.flip()
+    # print("FPS: ", 1.0 / (time.time() - start_time))
 pygame.quit()
