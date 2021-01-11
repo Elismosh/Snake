@@ -59,7 +59,7 @@ class Snake(pygame.sprite.Sprite):
         #     self.list[-1][2] = 'tail'
         # self.copy = self.list.copy()
 
-        for i in range(1, len(self.list)):
+        for i in range(len(self.list) - 1, 0, -1):
             self.list[i][0], self.list[i][1], self.list[i][3] = self.copy[i - 1][0], self.copy[i - 1][1], self.copy[i - 1][3]
         self.copy = self.list
 

@@ -28,9 +28,9 @@ class Snake(pygame.sprite.Sprite):
         self.add(snake)
         self.len = 3
         self.direction = 0
-        self.list = [[x * tile_size, y * tile_size, 'head', self.direction],
-                     [x * tile_size, (y + 1) * tile_size, 'body', self.direction],
-                     [x * tile_size, (y + 2) * tile_size, 'tail', self.direction]]
+        self.list = [[x * (tile_size // 2), y * (tile_size // 2), 'head', self.direction],
+                     [x * (tile_size // 2), (y + 1) * (tile_size // 2), 'body', self.direction],
+                     [x * (tile_size // 2), (y + 2) * (tile_size // 2), 'tail', self.direction]]
         self.copy = self.list.copy()
 
     def change_direction(self, dirctn=None):
@@ -39,13 +39,13 @@ class Snake(pygame.sprite.Sprite):
 
     def update(self):
         if self.direction in [0, 2]:
-            self.list.insert(0, [self.list[0][0], self.list[0][1] + (self.direction - 1) * tile_size, 'head',
+            self.list.insert(0, [self.list[0][0], self.list[0][1] + (self.direction - 1) * (tile_size // 2), 'head',
                                  self.direction])
         else:
-            self.list.insert(0, [self.list[0][0] + self.direction * tile_size, self.list[0][1], 'head', self.direction])
+            self.list.insert(0, [self.list[0][0] + self.direction * (tile_size // 2), self.list[0][1], 'head', self.direction])
         self.list[1][2] = 'body'
         if self.list[0][0] == apple_object.rect.x and self.list[0][1] == apple_object.rect.y:
-            is_apple = False
+            apple_object.update()
         else:
             self.list.pop()
             self.list[-1][2] = 'tail'
@@ -53,6 +53,7 @@ class Snake(pygame.sprite.Sprite):
 
     def move(self):
         for elem in self.list:
+            pass
 
     # def eat_apple(self):
     #     # Part_of_snake()
@@ -61,10 +62,20 @@ class Snake(pygame.sprite.Sprite):
 
     def draw(self):
         for elem in self.list:
-            image = load_image(elem[2] + str(elem[3]) + '.png')
+            image = pygame.transform.scale(load_image(elem[2] + str(elem[3]) + '.png'), (tile_size // 2, tile_size // 2))
             rect = image.get_rect()
             rect.x, rect.y = elem[0] + (tile_size - rect.width) // 2, elem[1] + (tile_size - rect.height) // 2
             screen.blit(image, rect)
+        self.image = load_image(self.list[0][2] + str(self.list[0][3]) + '.png')
+        self.rect = self.image.get_rect()
+        self.rect.x = self.list[0][0]
+        self.rect.y = self.list[0][1]
+        # self.mask = pygame.mask.from_surface(self.image)
+        # if pygame.sprite.collide_mask(self, upper_wall) or pygame.sprite.collide_mask(self, right_wall) or\
+        #    pygame.sprite.collide_mask(self, left_wall) or pygame.sprite.collide_mask(self, bottom_wall):
+        #     pass
+        if pygame.sprite.spritecollideany(self, borders):
+            pass
 
 
 class Border(pygame.sprite.Sprite):
@@ -84,7 +95,23 @@ class Apple(pygame.sprite.Sprite):
         if self.x == 9 and self.y in range(5, 8):
             self.x = 8
         self.image = load_image('apple.png')
-        self.rect = pygame.Rect(self.x * tile_size + 2, self.y * tile_size + 2, tile_size, tile_size)
+        self.rect = pygame.Rect(self.x * tile_size, self.y * tile_size, tile_size, tile_size)
+
+    def update(self):
+        self.x = random.randrange(tile_in_width)
+        self.y = random.randrange(tile_in_height)
+        # flag = True
+        # for el in snake_object.list:
+        #     if el[0] == self.x or el[1] == self.y:
+        #         flag = False
+        # while not flag:
+        #     self.x = random.randrange(tile_in_width)
+        #     self.y = random.randrange(tile_in_height)
+        #     flag = True
+        #     for el in snake_object.list:
+        #         if el[0] == self.x or el[1] == self.y:
+        #             flag = False
+        self.rect = pygame.Rect(self.x * tile_size, self.y * tile_size, tile_size, tile_size)
 
 
 all_sprites = pygame.sprite.Group()
@@ -93,19 +120,19 @@ apple = pygame.sprite.Group()
 snake = pygame.sprite.Group()
 parts = pygame.sprite.Group()
 
-tile_in_height, tile_in_width = 12, 16
+tile_in_height, tile_in_width = 10, 15
 tile_size = 50
 size = width, height = tile_in_width * tile_size + 4, tile_in_height * tile_size + 4
 screen = pygame.display.set_mode(size)
 
-Border(0, 0, width, 2)
-Border(width - 2, 0, 2, height)
-Border(0, height - 2, width, 2)
-Border(0, 0, 2, height)
-snake_object = Snake(9, 9)
+upper_wall = Border(0, 0, width, 2)
+right_wall = Border(width - 2, 0, 2, height)
+bottom_wall = Border(0, height - 2, width, 2)
+left_wall = Border(0, 0, 2, height)
+snake_object = Snake(random.randrange(2, tile_in_width), random.randrange(2, tile_in_height - 2))
 apple_object = Apple()
 MYEVENTTYPE = pygame.USEREVENT + 1
-pygame.time.set_timer(MYEVENTTYPE, 500)
+pygame.time.set_timer(MYEVENTTYPE, 250)
 
 running = True
 is_apple = True
@@ -126,6 +153,7 @@ while running:
                 snake_object.change_direction(2)
             elif event.key == pygame.K_d:
                 snake_object.change_direction(1)
+    screen.fill('black')
     load_background()
     if not is_apple:
         apple_object = Apple()
