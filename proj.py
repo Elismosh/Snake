@@ -7,8 +7,7 @@ import pygame
 pygame.init()
 pygame.font.init()
 
-FPS = 1
-tile_size = 50
+FPS = 80
 font = pygame.font.Font('data/font.ttf', 30)
 
 
@@ -84,21 +83,7 @@ def load_background():
         for j in range(tile_in_width):
             pygame.draw.rect(screen, colors[(i + j) % 2],
                              (tile_size * j + 2, tile_size * i + 2, tile_size, tile_size), 0)
-    # colors = ['#449f35', '#60c44f']
-    # for i in range(12):
-    #     for j in range(16):
-    #         pygame.draw.rect(screen, colors[(i + j) % 2],
-    #                          (tile_size * j + 2, tile_size * i + 2, tile_size, tile_size), 0)
-    # colors = ['#fbec5d', '#f7e32a']
-    # for i in range(9):
-    #     for j in range(12):
-    #         pygame.draw.rect(screen, colors[(i + j) % 2],
-    #                          (tile_size * j + 2, tile_size * i + 2, tile_size, tile_size), 0)
-    # colors = ['#f78fa7', '#f56284']
-    # for i in range(6):
-    #     for j in range(8):
-    #         pygame.draw.rect(screen, colors[(i + j) % 2],
-    #                          (tile_size * j + 2, tile_size * i + 2, tile_size, tile_size), 0)
+    # 12*16, 9*12, 6*8
 
 
 def load_image(name):
@@ -106,7 +91,6 @@ def load_image(name):
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
         sys.exit()
-    # image = pygame.transform.scale(pygame.image.load(fullname), (800, 600))
     image = pygame.image.load(fullname)
     return image
 
@@ -118,7 +102,7 @@ def load_menu():
                 terminate()
             elif event.type == pygame.KEYDOWN or \
                     event.type == pygame.MOUSEBUTTONDOWN:
-                return  # начинаем игру
+                return
         menu.load_display()
         pygame.display.flip()
         clock.tick(FPS)
@@ -145,16 +129,6 @@ class Menu:
         # intro_rect.x = 10
         # screen.blit(string_rendered, intro_rect)
 
-        # while True:
-        #     for event in pygame.event.get():
-        #         if event.type == pygame.QUIT:
-        #             terminate()
-        #         elif event.type == pygame.KEYDOWN or \
-        #                 event.type == pygame.MOUSEBUTTONDOWN:
-        #             return  # начинаем игру
-        #     pygame.display.flip()
-        #     clock.tick(FPS)
-
     def is_options(self):
         pass
 
@@ -176,21 +150,6 @@ class Snake(pygame.sprite.Sprite):
         self.direction = 0
         self.list = [[x * tile_size + 2, y * tile_size + 2, 'head', self.direction],
                      [x * tile_size + 2, (y + 1) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 2) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 3) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 4) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 5) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 6) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 7) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 8) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 9) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 10) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 11) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 12) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 13) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 14) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 15) * tile_size + 2, 'body', self.direction],
-                     # [x * tile_size + 2, (y + 16) * tile_size + 2, 'body', self.direction],
                      [x * tile_size + 2, (y + 2) * tile_size + 2, 'tail', self.direction]]
 
     def change_direction(self, dirctn=None):
@@ -251,7 +210,6 @@ class Border(pygame.sprite.Sprite):
     def __init__(self, x, y, w, h):
         super().__init__(all_sprites)
         self.add(borders)
-        # self.image = pygame.Surface([x2 - x1, 1])
         self.rect = pygame.Rect(x, y, w, h)
 
 
@@ -284,7 +242,7 @@ parts = pygame.sprite.Group()
 clock = pygame.time.Clock()
 
 tile_in_height, tile_in_width = 12, 16
-# tile_size = 50
+tile_size = 50
 size = width, height = tile_in_width * tile_size + 4, tile_in_height * tile_size + 4
 screen = pygame.display.set_mode(size)
 
