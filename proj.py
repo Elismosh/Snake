@@ -275,7 +275,7 @@ class Menu:
         self.level = 0
 
         # Загружаем звук
-        self.music = False
+        self.music = True
         pygame.mixer.music.load("data/music.mp3")
         pygame.mixer.music.play(-1)
         pygame.mixer.music.set_volume(0.1)
@@ -305,7 +305,7 @@ class Menu:
                     num_rect.x = (width - t_w * frame.width) // 2 + (12 if num >= 10 else 26) + frame.width * j
                     screen.blit(num_rendered, num_rect)
                     num += 1
-        image = load_image('frame_for_classic.png')
+        image = load_image('frame_for_classic_level.png')
         frame = image.get_rect()
         screen.blit(image, ((width - t_w * frame.width) // 2,
                             (height - t_h * frame.height) // 2 - 30))
@@ -369,7 +369,7 @@ class Menu:
                                                        self.level // 7 * 80 + 152))
         x = 203 if self.speed in [1, 2] else 125
         y = 510 if self.speed in [1.5, 2] else 460
-        screen.blit(load_image('selected_frame_for_numbers.png'), (x, y))
+        screen.blit(load_image('selected_frame_for_speed.png'), (x, y))
 
         if self.size == [8, 6]:
             y = 411
